@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+using BankingBot.Models;
 
 namespace BankingBot
 {
@@ -25,8 +26,18 @@ namespace BankingBot
                 // calculate something for us to return
                 int length = (activity.Text ?? string.Empty).Length;
 
+                // LUIS
+                HttpClient client = new HttpClient();
+                var luisURL = "https://api.projectoxford.ai/luis/v2.0/apps/a118c892-898f-41b2-abf4-904c826613cf?subscription-key=3c04249ae37341989e1d95c41d0cbf24&q=";
+                string x = await client.GetStringAsync(new Uri(luisURL + activity.Text));
+
+                luis.RootObject rootObject;
+                rootObject = JsonConvert.DeserializeObject<luis.RootObject>(x);
+
+                string intent = rootObject.topScoringIntent.intent;
+
                 // return our reply to the user
-                Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters");
+                Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
                 await connector.Conversations.ReplyToActivityAsync(reply);
             }
             else
