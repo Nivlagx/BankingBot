@@ -37,3 +37,12 @@ C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\zh-hans\Mic
 C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\obj\Release\BankingBot.csprojResolveAssemblyReference.cache
 C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\obj\Release\Bot Application1.dll
 C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\obj\Release\Bot Application1.pdb
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\Microsoft.WindowsAzure.Mobile.dll
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\Microsoft.WindowsAzure.Mobile.Ext.dll
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\System.Net.Http.Extensions.dll
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\System.Net.Http.Primitives.dll
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\Microsoft.WindowsAzure.Mobile.xml
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\Microsoft.WindowsAzure.Mobile.Ext.xml
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\System.Net.Http.Extensions.xml
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\bin\System.Net.Http.Primitives.xml
+C:\Users\Galvin\Documents\Visual Studio 2015\Projects\BankingBot\obj\Release\BankingBot.csproj.App.config

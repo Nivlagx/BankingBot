@@ -8,6 +8,8 @@ using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using BankingBot.Models;
+using BankingBot.DataModels;
+using System.Collections.Generic;
 
 namespace BankingBot
 {
@@ -22,6 +24,10 @@ namespace BankingBot
         {
             if (activity.Type == ActivityTypes.Message)
             {
+                var userMessage = activity.Text;
+
+                string endOutput = "Hello";
+
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
                 // calculate something for us to return
                 int length = (activity.Text ?? string.Empty).Length;
@@ -37,7 +43,17 @@ namespace BankingBot
                 string intent = rootObject.topScoringIntent.intent;
 
                 // return our reply to the user
-                if (intent == "Greeting")
+                if (intent == "GetBalance")
+                {
+                    List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetBalance();
+                    endOutput = "";
+                    foreach (AccountsTable t in accounts)
+                    {
+                        endOutput += "[" + t.Date + "] Cheque " + t.Cheque + ", Savings " + t.Savings + ", Credit " + t.Credit + "\n\n";
+                    }
+
+                }
+                else if (intent == "Greeting")
                 {
                     Activity reply = activity.CreateReply($"Hello. What is your name?");
                     await connector.Conversations.ReplyToActivityAsync(reply);
