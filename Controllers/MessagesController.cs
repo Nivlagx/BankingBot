@@ -29,7 +29,7 @@ namespace BankingBot
                 // LUIS
                 HttpClient client = new HttpClient();
                 var luisURL = "https://api.projectoxford.ai/luis/v2.0/apps/a118c892-898f-41b2-abf4-904c826613cf?subscription-key=3c04249ae37341989e1d95c41d0cbf24&q=";
-                string x = await client.GetStringAsync(new Uri(luisURL + activity.Text));
+                string x = await client.GetStringAsync(new Uri(luisURL + activity.Text + "&verbose=true"));
 
                 luis.RootObject rootObject;
                 rootObject = JsonConvert.DeserializeObject<luis.RootObject>(x);
@@ -37,8 +37,27 @@ namespace BankingBot
                 string intent = rootObject.topScoringIntent.intent;
 
                 // return our reply to the user
-                Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
-                await connector.Conversations.ReplyToActivityAsync(reply);
+                if (intent == "Greeting")
+                {
+                    Activity reply = activity.CreateReply($"Hello. What is your name?");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
+                else if (intent == "Transfer")
+                {
+                    Activity reply = activity.CreateReply($"Hello. You want to transfer.");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
+                else if (intent == "GetExchangeRate")
+                {
+                    Activity reply = activity.CreateReply($"Hello. You want to get exchange rate.");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
+                else
+                {
+                    Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
+                
             }
             else
             {
