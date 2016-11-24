@@ -26,9 +26,18 @@ namespace BankingBot
             {
                 var userMessage = activity.Text;
 
+                var userName = "";
+
                 string endOutput = "Hello";
 
+                bool SentGreeting = false;
+
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+
+                // State Client
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+               
                 // calculate something for us to return
                 int length = (activity.Text ?? string.Empty).Length;
 
@@ -59,8 +68,23 @@ namespace BankingBot
                 }
                 else if (intent == "Greeting")
                 {
-                    Activity reply = activity.CreateReply($"Hello. What is your name?");
-                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    // calculate something for us to return
+                    if (userData.GetProperty<bool>("SentGreeting"))
+                    {
+                        endOutput = "Hello again";
+                    }
+                    else
+                    {
+                        endOutput = "Hello. What is your name?";
+                        userData.SetProperty<bool>("SentGreeting", true);
+                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                        userName = rootObject.entities[0].entity;
+                    }
+
+                    // return our reply to the user
+                    Activity infoReply = activity.CreateReply(endOutput);
+
+                    await connector.Conversations.ReplyToActivityAsync(infoReply);
                 }
                 else if (intent == "Transfer")
                 {
@@ -192,9 +216,18 @@ namespace BankingBot
                     Activity reply = activity.CreateReply($"Hello. You want to get exchange rate.");
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
+                else if (intent == "None")
+                {
+                    endOutput = "User data cleared";
+                    Activity reply = activity.CreateReply(endOutput);
+                    await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    SentGreeting = false;
+                }
                 else
                 {
-                    Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
+                    endOutput = "Please rephrase";
+                    Activity reply = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
 
