@@ -56,6 +56,7 @@ namespace BankingBot
                 exchangeObject = JsonConvert.DeserializeObject<exchange.RootObject>(xchange);
 
                 double aus = exchangeObject.rates.AUD;
+                double usd = exchangeObject.rates.USD;
 
                 string intent = rootObject.topScoringIntent.intent;
                 
@@ -221,14 +222,38 @@ namespace BankingBot
                 }
                 else if (intent == "GetExchangeRate")
                 {
+                    var currency = "";
+                    var country = "";
                     string entityRates = rootObject.entities[0].entity;
                     if (entityRates.ToLower().Equals("australia"))
                     {
-                        endOutput = "AUD: $" + aus;
+                        currency = "AUD: $" + aus;
+                        country = "Australia";
                     }
-                        
-                    Activity reply = activity.CreateReply(endOutput);
-                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    else if (entityRates.ToLower().Equals("america"))
+                    {
+                        currency = "USD: $" + usd;
+                        country = "America";
+                    }
+
+                    Activity replyToConversation = activity.CreateReply();
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "http://pngimg.com/upload/money_PNG3545.png"));
+                    
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Title = country,
+                        Subtitle = currency,
+                        Images = cardImages
+                    };
+
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
                 }
                 else if (intent == "None")
                 {
