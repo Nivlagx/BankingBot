@@ -41,15 +41,7 @@ namespace BankingBot
                 rootObject = JsonConvert.DeserializeObject<luis.RootObject>(x);
 
                 string intent = rootObject.topScoringIntent.intent;
-
-                // convert string to double
-                string entityMoney = rootObject.entities[1].entity;
-                double money;
-                money = Convert.ToDouble(entityMoney);
-
-                string entityToAccount = rootObject.entities[2].entity;
-                string entityFromAccount = rootObject.entities[3].entity;
-
+                
                 // return our reply to the user
                 if (intent == "GetBalance")
                 {
@@ -72,6 +64,14 @@ namespace BankingBot
                 }
                 else if (intent == "Transfer")
                 {
+                    // convert string to double
+                    string entityMoney = rootObject.entities[1].entity;
+                    double money;
+                    money = Convert.ToDouble(entityMoney);
+
+                    string entityToAccount = rootObject.entities[2].entity;
+                    string entityFromAccount = rootObject.entities[3].entity;
+
                     // From Cheque account
                     if (entityFromAccount.ToLower().Equals("cheque"))
                     {
@@ -165,7 +165,7 @@ namespace BankingBot
                     Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
-                
+
             }
             else
             {
