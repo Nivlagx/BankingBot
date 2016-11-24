@@ -106,7 +106,7 @@ namespace BankingBot
                         }
                     }
                     endOutput = balance.ToString();
-                    Activity reply = activity.CreateReply(endOutput);
+                    Activity reply = activity.CreateReply("$" + endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
                 else if (intent == "Greeting")
