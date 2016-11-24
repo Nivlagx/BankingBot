@@ -281,7 +281,7 @@ namespace BankingBot
                     ThumbnailCard plCard = new ThumbnailCard()
                     {
                         Title = country,
-                        Subtitle = currency,
+                        Subtitle = "NZD: $1.00 = " + currency,
                         Images = cardImages
                     };
 
