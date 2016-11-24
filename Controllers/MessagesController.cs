@@ -64,13 +64,28 @@ namespace BankingBot
                 }
                 else if (intent == "Transfer")
                 {
-                    // convert string to double
-                    string entityMoney = rootObject.entities[1].entity;
-                    double money;
-                    money = Convert.ToDouble(entityMoney);
+                    string entityMoney = "";
+                    double money = 0;
+                    string entityToAccount = "";
+                    string entityFromAccount = "";
+                    
+                    // JSON check
+                    if (rootObject.entities[2].type == "number")
+                    {
+                        // convert string to double
+                        entityMoney = rootObject.entities[2].entity;
+                        money = Convert.ToDouble(entityMoney);
+                    }
 
-                    string entityToAccount = rootObject.entities[2].entity;
-                    string entityFromAccount = rootObject.entities[3].entity;
+                    if (rootObject.entities[0].type == "Account::ToAccount")
+                    {
+                        entityToAccount = rootObject.entities[0].entity;
+                    }
+                    
+                    if (rootObject.entities[1].type == "Account::FromAccount")
+                    {
+                        entityFromAccount = rootObject.entities[1].entity;
+                    }
 
                     // From Cheque account
                     if (entityFromAccount.ToLower().Equals("cheque"))
@@ -84,9 +99,9 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Cheque to Savings.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Cheque to Savings.";
                         }
-                        if (entityToAccount.ToLower().Equals("credit"))
+                        else if (entityToAccount.ToLower().Equals("credit"))
                         {
                             AccountsTable account = new AccountsTable()
                             {
@@ -95,12 +110,16 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Cheque to Credit.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Cheque to Credit.";
+                        }
+                        else
+                        {
+                            endOutput = "Error";
                         }
                     }
 
                     // From Savings account
-                    if (entityFromAccount.ToLower().Equals("savings"))
+                    else if (entityFromAccount.ToLower().Equals("savings"))
                     {
                         if (entityToAccount.ToLower().Equals("cheque"))
                         {
@@ -111,9 +130,9 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Savings to Cheque.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Savings to Cheque.";
                         }
-                        if (entityToAccount.ToLower().Equals("credit"))
+                        else if (entityToAccount.ToLower().Equals("credit"))
                         {
                             AccountsTable account = new AccountsTable()
                             {
@@ -122,12 +141,16 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Savings to Credit.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Savings to Credit.";
+                        }
+                        else
+                        {
+                            endOutput = "Error";
                         }
                     }
 
                     // From Credit account
-                    if (entityFromAccount.ToLower().Equals("credit"))
+                    else if (entityFromAccount.ToLower().Equals("credit"))
                     {
                         if (entityToAccount.ToLower().Equals("savings"))
                         {
@@ -138,9 +161,9 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Credit to Savings.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Credit to Savings.";
                         }
-                        if (entityToAccount.ToLower().Equals("cheque"))
+                        else if (entityToAccount.ToLower().Equals("cheque"))
                         {
                             AccountsTable account = new AccountsTable()
                             {
@@ -149,11 +172,20 @@ namespace BankingBot
                                 Date = DateTime.Now
                             };
                             await AzureManager.AzureManagerInstance.AddTimeline(account);
-                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Credit to Cheque.";
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + " From Credit to Cheque.";
                         }
+                        else
+                        {
+                            endOutput = "Error";
+                        }
+                    }
+                    else
+                    {
+                        endOutput = "Please rephrase";
                     }
                     Activity reply = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
+
                 }
                 else if (intent == "GetExchangeRate")
                 {
