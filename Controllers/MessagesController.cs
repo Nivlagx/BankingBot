@@ -59,11 +59,11 @@ namespace BankingBot
                 double usd = exchangeObject.rates.USD;
 
                 string intent = rootObject.topScoringIntent.intent;
-                
+
                 // return our reply to the user
-                if (intent == "GetBalance")
+                if (intent == "GetTransaction")
                 {
-                    List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetBalance();
+                    List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetTransaction();
                     List<string> transaction = new List<string>();
                     int i = -1;
                     foreach (AccountsTable t in accounts)
@@ -74,6 +74,40 @@ namespace BankingBot
                     Activity reply = activity.CreateReply(transaction[i]);
                     await connector.Conversations.ReplyToActivityAsync(reply);
 
+                }
+                else if (intent == "GetBalance")
+                {
+                    var entityAccount = rootObject.entities[0].entity;
+                    double balance = 0;
+                    if (entityAccount.ToLower().Equals("savings"))
+                    {
+                        List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetTransaction();
+                        
+                        foreach (AccountsTable t in accounts)
+                        {
+                            balance += t.Savings;                        }
+                    }
+                    else if (entityAccount.ToLower().Equals("cheque"))
+                    {
+                        List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetTransaction();
+
+                        foreach (AccountsTable t in accounts)
+                        {
+                            balance += t.Cheque;
+                        }
+                    }
+                    else if (entityAccount.ToLower().Equals("credit"))
+                    {
+                        List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetTransaction();
+
+                        foreach (AccountsTable t in accounts)
+                        {
+                            balance += t.Credit;
+                        }
+                    }
+                    endOutput = balance.ToString();
+                    Activity reply = activity.CreateReply(endOutput);
+                    await connector.Conversations.ReplyToActivityAsync(reply);
                 }
                 else if (intent == "Greeting")
                 {
@@ -101,7 +135,7 @@ namespace BankingBot
                     double money = 0;
                     string entityToAccount = "";
                     string entityFromAccount = "";
-                    
+
                     // JSON check
                     if (rootObject.entities[2].type == "number")
                     {
@@ -114,7 +148,7 @@ namespace BankingBot
                     {
                         entityToAccount = rootObject.entities[0].entity;
                     }
-                    
+
                     if (rootObject.entities[1].type == "Account::FromAccount")
                     {
                         entityFromAccount = rootObject.entities[1].entity;
@@ -243,7 +277,7 @@ namespace BankingBot
 
                     List<CardImage> cardImages = new List<CardImage>();
                     cardImages.Add(new CardImage(url: "http://www.currencysymbols.in/images/currency-world.jpg"));
-                    
+
                     ThumbnailCard plCard = new ThumbnailCard()
                     {
                         Title = country,

@@ -39,7 +39,7 @@ namespace BankingBot
             }
         }
 
-        public async Task<List<AccountsTable>> GetBalance()
+        public async Task<List<AccountsTable>> GetTransaction()
         {
             return await this.accountsTable.ToListAsync();
         }
