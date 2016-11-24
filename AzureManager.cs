@@ -17,7 +17,7 @@ namespace BankingBot
 
         private AzureManager()
         {
-            this.client = new MobileServiceClient("http://contosodigitaldb.azurewebsites.net/");
+            this.client = new MobileServiceClient("http://contosodigitaldb.azurewebsites.net");
             this.accountsTable = this.client.GetTable<AccountsTable>();
         }
 
