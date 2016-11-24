@@ -43,5 +43,10 @@ namespace BankingBot
         {
             return await this.accountsTable.ToListAsync();
         }
+
+        public async Task AddTimeline(AccountsTable account)
+        {
+            await this.accountsTable.InsertAsync(account);
+        }
     }
 }

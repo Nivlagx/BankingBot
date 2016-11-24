@@ -42,16 +42,26 @@ namespace BankingBot
 
                 string intent = rootObject.topScoringIntent.intent;
 
+                // convert string to double
+                string entityMoney = rootObject.entities[1].entity;
+                double money;
+                money = Convert.ToDouble(entityMoney);
+
+                string entityToAccount = rootObject.entities[2].entity;
+                string entityFromAccount = rootObject.entities[3].entity;
+
                 // return our reply to the user
                 if (intent == "GetBalance")
                 {
                     List<AccountsTable> accounts = await AzureManager.AzureManagerInstance.GetBalance();
-                    endOutput = "";
+                    List<string> transaction = new List<string>();
+                    int i = -1;
                     foreach (AccountsTable t in accounts)
                     {
-                        endOutput += "[" + t.Date + "] Cheque " + t.Cheque + ", Savings " + t.Savings + ", Credit " + t.Credit + "\n\n";
+                        transaction.Add("[" + t.Date + "] Cheque " + t.Cheque + ", Savings " + t.Savings + ", Credit " + t.Credit + "\n\n");
+                        i += 1;
                     }
-                    Activity reply = activity.CreateReply(endOutput);
+                    Activity reply = activity.CreateReply(transaction[i]);
                     await connector.Conversations.ReplyToActivityAsync(reply);
 
                 }
@@ -62,7 +72,87 @@ namespace BankingBot
                 }
                 else if (intent == "Transfer")
                 {
-                    Activity reply = activity.CreateReply($"Hello. You want to transfer.");
+                    // From Cheque account
+                    if (entityFromAccount.ToLower().Equals("cheque"))
+                    {
+                        if (entityToAccount.ToLower().Equals("savings"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Cheque = 0 - money,
+                                Savings = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Cheque to Savings.";
+                        }
+                        if (entityToAccount.ToLower().Equals("credit"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Cheque = 0 - money,
+                                Credit = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Cheque to Credit.";
+                        }
+                    }
+
+                    // From Savings account
+                    if (entityFromAccount.ToLower().Equals("savings"))
+                    {
+                        if (entityToAccount.ToLower().Equals("cheque"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Savings = 0 - money,
+                                Cheque = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Savings to Cheque.";
+                        }
+                        if (entityToAccount.ToLower().Equals("credit"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Savings = 0 - money,
+                                Credit = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Savings to Credit.";
+                        }
+                    }
+
+                    // From Credit account
+                    if (entityFromAccount.ToLower().Equals("credit"))
+                    {
+                        if (entityToAccount.ToLower().Equals("savings"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Credit = 0 - money,
+                                Savings = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Credit to Savings.";
+                        }
+                        if (entityToAccount.ToLower().Equals("cheque"))
+                        {
+                            AccountsTable account = new AccountsTable()
+                            {
+                                Credit = 0 - money,
+                                Cheque = money,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(account);
+                            endOutput = "New transaction made [" + account.Date + "] $" + money + "From Credit to Cheque.";
+                        }
+                    }
+                    Activity reply = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
                 else if (intent == "GetExchangeRate")
