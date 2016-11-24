@@ -242,7 +242,7 @@ namespace BankingBot
                     replyToConversation.Attachments = new List<Attachment>();
 
                     List<CardImage> cardImages = new List<CardImage>();
-                    cardImages.Add(new CardImage(url: "http://pngimg.com/upload/money_PNG3545.png"));
+                    cardImages.Add(new CardImage(url: "http://www.currencysymbols.in/images/currency-world.jpg"));
                     
                     ThumbnailCard plCard = new ThumbnailCard()
                     {
