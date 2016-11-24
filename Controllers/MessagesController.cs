@@ -49,6 +49,14 @@ namespace BankingBot
                 luis.RootObject rootObject;
                 rootObject = JsonConvert.DeserializeObject<luis.RootObject>(x);
 
+                // exhange rate
+                string xchange = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=NZD"));
+
+                exchange.RootObject exchangeObject;
+                exchangeObject = JsonConvert.DeserializeObject<exchange.RootObject>(xchange);
+
+                double aus = exchangeObject.rates.AUD;
+
                 string intent = rootObject.topScoringIntent.intent;
                 
                 // return our reply to the user
@@ -213,7 +221,13 @@ namespace BankingBot
                 }
                 else if (intent == "GetExchangeRate")
                 {
-                    Activity reply = activity.CreateReply($"Hello. You want to get exchange rate.");
+                    string entityRates = rootObject.entities[0].entity;
+                    if (entityRates.ToLower().Equals("australia"))
+                    {
+                        endOutput = "AUD: $" + aus;
+                    }
+                        
+                    Activity reply = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
                 else if (intent == "None")
