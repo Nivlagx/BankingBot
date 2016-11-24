@@ -26,9 +26,18 @@ namespace BankingBot
             {
                 var userMessage = activity.Text;
 
+                var userName = "";
+
                 string endOutput = "Hello";
 
+                bool SentGreeting = false;
+
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+
+                // State Client
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+               
                 // calculate something for us to return
                 int length = (activity.Text ?? string.Empty).Length;
 
@@ -39,6 +48,15 @@ namespace BankingBot
 
                 luis.RootObject rootObject;
                 rootObject = JsonConvert.DeserializeObject<luis.RootObject>(x);
+
+                // exhange rate
+                string xchange = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=NZD"));
+
+                exchange.RootObject exchangeObject;
+                exchangeObject = JsonConvert.DeserializeObject<exchange.RootObject>(xchange);
+
+                double aus = exchangeObject.rates.AUD;
+                double usd = exchangeObject.rates.USD;
 
                 string intent = rootObject.topScoringIntent.intent;
                 
@@ -59,8 +77,23 @@ namespace BankingBot
                 }
                 else if (intent == "Greeting")
                 {
-                    Activity reply = activity.CreateReply($"Hello. What is your name?");
-                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    // calculate something for us to return
+                    if (userData.GetProperty<bool>("SentGreeting"))
+                    {
+                        endOutput = "Hello again";
+                    }
+                    else
+                    {
+                        endOutput = "Hello. What is your name?";
+                        userData.SetProperty<bool>("SentGreeting", true);
+                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                        userName = rootObject.entities[0].entity;
+                    }
+
+                    // return our reply to the user
+                    Activity infoReply = activity.CreateReply(endOutput);
+
+                    await connector.Conversations.ReplyToActivityAsync(infoReply);
                 }
                 else if (intent == "Transfer")
                 {
@@ -189,12 +222,51 @@ namespace BankingBot
                 }
                 else if (intent == "GetExchangeRate")
                 {
-                    Activity reply = activity.CreateReply($"Hello. You want to get exchange rate.");
+                    var currency = "";
+                    var country = "";
+                    string entityRates = rootObject.entities[0].entity;
+                    if (entityRates.ToLower().Equals("australia"))
+                    {
+                        currency = "AUD: $" + aus;
+                        country = "Australia";
+                    }
+                    else if (entityRates.ToLower().Equals("america"))
+                    {
+                        currency = "USD: $" + usd;
+                        country = "America";
+                    }
+
+                    Activity replyToConversation = activity.CreateReply();
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "http://pngimg.com/upload/money_PNG3545.png"));
+                    
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Title = country,
+                        Subtitle = currency,
+                        Images = cardImages
+                    };
+
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+                }
+                else if (intent == "None")
+                {
+                    endOutput = "User data cleared";
+                    Activity reply = activity.CreateReply(endOutput);
+                    await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     await connector.Conversations.ReplyToActivityAsync(reply);
+                    SentGreeting = false;
                 }
                 else
                 {
-                    Activity reply = activity.CreateReply($"Hello. You sent {activity.Text} which was {length} characters. Your intent is: {intent}");
+                    endOutput = "Please rephrase";
+                    Activity reply = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                 }
 

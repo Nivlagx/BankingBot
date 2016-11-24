@@ -138,6 +138,7 @@
     <Compile Include="AzureManager.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="DataModels\AccountsTable .cs" />
+    <Compile Include="DataModels\exchange.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
