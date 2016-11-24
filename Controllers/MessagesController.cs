@@ -51,6 +51,8 @@ namespace BankingBot
                     {
                         endOutput += "[" + t.Date + "] Cheque " + t.Cheque + ", Savings " + t.Savings + ", Credit " + t.Credit + "\n\n";
                     }
+                    Activity reply = activity.CreateReply(endOutput);
+                    await connector.Conversations.ReplyToActivityAsync(reply);
 
                 }
                 else if (intent == "Greeting")
