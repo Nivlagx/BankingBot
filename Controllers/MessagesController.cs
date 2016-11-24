@@ -84,7 +84,7 @@ namespace BankingBot
                     }
                     else
                     {
-                        endOutput = "Hello. What is your name?";
+                        endOutput = "Hello, Welcome to Contoso Bank.";
                         userData.SetProperty<bool>("SentGreeting", true);
                         await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
                         userName = rootObject.entities[0].entity;
